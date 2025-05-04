@@ -1,6 +1,7 @@
 ## CapsWriter-Offline
 
-![image-20240108115946521](assets/image-20240108115946521.png)  
+<img src="./images/logo.png" style="display: block; margin: 0 auto; border-radius: 5%;" />
+
 
 这是 `CapsWriter-Offline` ，一个 PC 端的语音输入、字幕转录工具。
 

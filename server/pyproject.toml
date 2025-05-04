@@ -1,0 +1,26 @@
+[project]
+name = "CapsWriter-Offline-Server"
+version = "0.1.0"
+description = "CapsWriter-Offline的服务端"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "rich==14.0.0",
+    "websockets==13.0.0",
+    "numpy==2.2.5",
+    "typeguard==2.13.3",
+    "sherpa_onnx==1.8.11",
+    "funasr_onnx==0.2.5",
+    "kaldi-native-fbank==1.17",
+    "jieba==0.42.1",
+]
+
+[dependency-groups]
+dev = ["pytest>=8.3.5", "pytest-asyncio>=0.26.0", "pytest-cov>=6.1.1"]
+
+[tool.pytest.ini_options]
+addopts = "--cov=src --cov-report=term-missing"
+pythonpath = "."
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+markers = ["unit: 标记单元测试", "integration: 标记集成测试"]

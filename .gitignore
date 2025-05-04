@@ -1,0 +1,11 @@
+# python
+**/.venv/
+**/__pycache__/
+.python-version
+
+# pytest
+.coverage
+**/.pytest_cache
+
+# model
+**/models/*
