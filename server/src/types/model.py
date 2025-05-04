@@ -18,9 +18,21 @@ class ParaformerModelArgs(BaseModelArgs):
 
 
 @dataclass
-class CTTransformer(BaseModelArgs):
+class CTTransformerArgs(BaseModelArgs):
     model_dir: Union[str, Path]
     batch_size: int
     device_id: Union[str, int]
     quantize: bool
     intra_op_num_threads: int
+
+
+@dataclass
+class SenseVoiceArgs(BaseModelArgs):
+    model: Path
+    tokens: Path
+    num_threads: int
+    sample_rate: int
+    feature_dim: int
+    decoding_method: str
+    use_itn: bool
+    debug: bool
