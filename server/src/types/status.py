@@ -29,11 +29,13 @@ class Status(St):
         self.on = True
 
     def start(self) -> None:
+        """开始播放"""
         if not self.started:
             self.started = True
             super().start()
 
     def stop(self) -> None:
+        """停止播放"""
         if self.started:
             self.started = False
             super().stop()

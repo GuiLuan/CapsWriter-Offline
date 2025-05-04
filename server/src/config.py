@@ -1,28 +1,35 @@
 from pathlib import Path
+from .types.model import ParaformerModelArgs, CTTransformer
+
+_BASE_DIR = Path(__file__).parents[1]
 
 
 class ServerConfig:
     addr = "0.0.0.0"
     port = 6016
 
-    format_num = True  # 输出时是否将中文数字转为阿拉伯数字
-    format_punc = True  # 输出时是否启用标点符号引擎
-    format_spell = True  # 输出时是否调整中英之间的空格
+    # 中文数字 -> 阿拉伯数字
+    format_num = True
+    # 启用 punc_model 与否
+    format_punc = True
+    # 调整中英空格
+    format_spell = True
 
-
-class ModelPaths:
-    _BASE_DIR = Path(__file__).parents[1]
-    model_dir = _BASE_DIR / "models"
-    paraformer_path = _BASE_DIR / "models" / "paraformer-offline-zh" / "model.int8.onnx"
-    tokens_path = _BASE_DIR / "models" / "paraformer-offline-zh" / "tokens.txt"
-    punc_model_dir = _BASE_DIR / "models" / "punc_ct-transformer_cn-en"
-
-
-class ParaformerArgs:
-    paraformer = f"{ModelPaths.paraformer_path}"
-    tokens = f"{ModelPaths.tokens_path}"
-    num_threads = 6
-    sample_rate = 16000
-    feature_dim = 80
-    decoding_method = "greedy_search"
-    debug = False
+    # 语音识别模型
+    recognize_model = ParaformerModelArgs(
+        paraformer=_BASE_DIR / "models" / "paraformer-offline-zh" / "model.int8.onnx",
+        tokens=_BASE_DIR / "models" / "paraformer-offline-zh" / "tokens.txt",
+        num_threads=6,
+        sample_rate=16000,
+        feature_dim=80,
+        decoding_method="greedy_search",
+        debug=False,
+    )
+    # 标点断句模型
+    punc_model = CTTransformer(
+        model_dir=_BASE_DIR / "models" / "punc_ct-transformer_cn-en",
+        batch_size=1,
+        device_id="-1",
+        quantize=True,
+        intra_op_num_threads=6,
+    )

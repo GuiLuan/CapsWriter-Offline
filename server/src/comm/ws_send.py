@@ -13,7 +13,6 @@ async def ws_send():
         try:
             # 获取识别结果（从多进程队列）
             result: Result = await asyncio.to_thread(queue_out.get)
-            print(f"从队列获取结果: {result}")  # 调试信息
 
             # 得到退出的通知
             if result is None:

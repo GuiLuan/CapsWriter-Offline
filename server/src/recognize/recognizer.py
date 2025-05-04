@@ -3,10 +3,11 @@ import signal
 from multiprocessing import Queue
 from platform import system
 
-from ..types.cosmic import console
 from .recognize import recognize
+from .load_model import load_model
+from ..types.cosmic import console
 from ..utils.empty_working_set import empty_current_working_set
-from ..config import ServerConfig as Config, ParaformerArgs, ModelPaths
+from ..config import ServerConfig as Config
 
 
 def disable_jieba_debug():
@@ -17,38 +18,28 @@ def disable_jieba_debug():
     jieba.setLogLevel(logging.INFO)
 
 
-def init_recognizer(queue_in: Queue, queue_out: Queue, sockets_id):
+def recognizer_service(queue_in: Queue, queue_out: Queue, sockets_id):
     # Ctrl-C 退出
     signal.signal(signal.SIGINT, lambda signum, frame: exit())
 
-    # 导入模块
-    with console.status("载入模块中…", spinner="bouncingBall", spinner_style="yellow"):
-        import sherpa_onnx
-        from funasr_onnx import CT_Transformer
-
-        disable_jieba_debug()
-    console.print("[green4]模块加载完成", end="\n\n")
+    disable_jieba_debug()
 
     # 载入语音模型
-    console.print("[yellow]语音模型载入中", end="\r")
     t1 = time.time()
-    recognizer = sherpa_onnx.OfflineRecognizer.from_paraformer(
-        **{
-            key: value
-            for key, value in ParaformerArgs.__dict__.items()
-            if not key.startswith("_")
-        }
-    )
+    console.print("[yellow]语音模型载入中", end="\r")
+    recognizer = load_model(Config.recognize_model)
     console.print("[green4]语音模型载入完成", end="\n\n")
+    console.print(f"[green4]语音模型载入耗时：{time.time() - t1}", end="\n\n")
 
     # 载入标点模型
+    t2 = time.time()
     punc_model = None
     if Config.format_punc:
         console.print("[yellow]标点模型载入中", end="\r")
-        punc_model = CT_Transformer(ModelPaths.punc_model_dir, quantize=True)
+        punc_model = load_model(Config.punc_model)
         console.print("[green4]标点模型载入完成", end="\n\n")
-
-    console.print(f"模型加载耗时 {time.time() - t1:.2f}s", end="\n\n")
+        console.print(f"[green4]标点模型载入耗时：{time.time() - t2}", end="\n\n")
+    console.print(f"模型加载总耗时 {time.time() - t1:.2f}s", end="\n\n")
 
     # 清空物理内存工作集
     if system() == "Windows":

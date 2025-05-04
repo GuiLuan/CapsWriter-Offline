@@ -5,9 +5,55 @@ from base64 import b64decode
 
 from ..types.cosmic import console, Cosmic
 from ..types.task import Task
-from ..types.my_status import Status
+from ..types.status import Status
+
 
 status_mic = Status("正在接收音频", spinner="point")
+
+
+async def ws_recv(websocket):
+    global status_mic
+
+    # 登记 socket 到字典，以 socket id 字符串为索引
+    sockets = Cosmic.sockets
+    sockets_id = Cosmic.sockets_id
+    sockets[str(websocket.id)] = websocket
+    sockets_id.append(str(websocket.id))
+    console.print(f"接客了：{websocket}\n", style="yellow")
+
+    # # 设定分段长度
+    # seg_duration = 15
+    # seg_overlap = 2
+    # seg_threshold = seg_duration + seg_overlap * 2
+
+    # 片段缓冲区、偏移时长
+    cache = Cache()
+
+    # 接收数据
+    try:
+        async for message in websocket:
+            # json 解码字符串
+            message = json.loads(message)
+
+            # 处理数据
+            await message_handler(websocket, message, cache)
+
+        console.print(
+            "ConnectionClosed...",
+        )
+    except websockets.ConnectionClosed:
+        console.print(
+            "ConnectionClosed...",
+        )
+    except websockets.InvalidState:
+        console.print("InvalidState...")
+    except Exception as e:
+        console.print("Exception:", e)
+    finally:
+        status_mic.stop()
+        status_mic.on = False
+        sockets.pop(str(websocket.id))
+        sockets_id.remove(str(websocket.id))
 
 
 class Cache:
@@ -93,48 +139,3 @@ async def message_handler(websocket, message, cache: Cache):
         cache.chunks = b""
         cache.offset = 0
         cache.frame_num = 0
-
-
-async def ws_recv(websocket):
-    global status_mic
-
-    # 登记 socket 到字典，以 socket id 字符串为索引
-    sockets = Cosmic.sockets
-    sockets_id = Cosmic.sockets_id
-    sockets[str(websocket.id)] = websocket
-    sockets_id.append(str(websocket.id))
-    console.print(f"接客了：{websocket}\n", style="yellow")
-
-    # # 设定分段长度
-    # seg_duration = 15
-    # seg_overlap = 2
-    # seg_threshold = seg_duration + seg_overlap * 2
-
-    # 片段缓冲区、偏移时长
-    cache = Cache()
-
-    # 接收数据
-    try:
-        async for message in websocket:
-            # json 解码字符串
-            message = json.loads(message)
-
-            # 处理数据
-            await message_handler(websocket, message, cache)
-
-        console.print(
-            "ConnectionClosed...",
-        )
-    except websockets.ConnectionClosed:
-        console.print(
-            "ConnectionClosed...",
-        )
-    except websockets.InvalidState:
-        console.print("InvalidState...")
-    except Exception as e:
-        console.print("Exception:", e)
-    finally:
-        status_mic.stop()
-        status_mic.on = False
-        sockets.pop(str(websocket.id))
-        sockets_id.remove(str(websocket.id))
