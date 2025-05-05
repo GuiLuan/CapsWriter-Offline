@@ -3,7 +3,7 @@ import time
 import numpy as np
 from sherpa_onnx import OfflineRecognizer
 
-from ..types.task import Task, Result
+from ..mtypes import Task, Result
 
 __all__ = ["recognize"]
 

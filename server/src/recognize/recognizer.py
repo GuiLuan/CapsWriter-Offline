@@ -3,11 +3,9 @@ import signal
 from multiprocessing import Queue
 from platform import system
 
-from .recognize import recognize
-from .load_model import load_model
-from ..types.cosmic import console
-from ..utils.format_tools import format_text
-from ..utils.empty_working_set import empty_current_working_set
+from . import recognize, load_model
+from ..mtypes import console
+from ..utils import format_text, empty_current_working_set
 from ..config import ServerConfig as Config
 
 

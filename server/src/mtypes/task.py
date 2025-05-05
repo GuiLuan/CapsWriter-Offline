@@ -1,3 +1,6 @@
+__all__ = ["Task", "Result"]
+
+
 class Task:
     def __init__(
         self,

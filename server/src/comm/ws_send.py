@@ -1,8 +1,7 @@
 import asyncio
 import json
 
-from ..types.cosmic import console, Cosmic
-from ..types.task import Result
+from ..mtypes import Cosmic, console, Result
 
 
 async def ws_send():

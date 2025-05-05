@@ -3,8 +3,7 @@ from pathlib import Path
 from typing import Any, Iterable, Generator, Set
 from dataclasses import is_dataclass, fields as dataclass_fields  # 重命名避免冲突
 
-from ..types.model import BaseModelArgs
-from ..types.cosmic import console
+from ..mtypes import BaseModelArgs, console
 
 __all__ = ["check_model"]
 

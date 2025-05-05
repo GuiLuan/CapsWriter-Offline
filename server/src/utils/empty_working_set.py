@@ -1,5 +1,6 @@
 import ctypes
 
+__all__ = ["empty_current_working_set"]
 
 def empty_working_set(pid: int):
     # 获取 pid 的句柄

@@ -2,6 +2,7 @@ from rich.console import RenderableType
 from rich.style import StyleType
 from rich.status import Status as St
 
+__all__ = ["Status"]
 
 class Status(St):
     """

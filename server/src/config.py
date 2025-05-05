@@ -1,5 +1,5 @@
 from pathlib import Path
-from .types.model import ParaformerModelArgs, SenseVoiceArgs, CTTransformerArgs
+from .mtypes import ParaformerModelArgs, SenseVoiceArgs, CTTransformerArgs
 
 __all__ = ["ServerConfig"]
 

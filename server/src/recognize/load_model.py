@@ -2,7 +2,7 @@ import sherpa_onnx
 import funasr_onnx
 from pathlib import Path
 
-from ..types.model import (
+from ..mtypes import (
     BaseModelArgs,
     ParaformerModelArgs,
     CTTransformerArgs,

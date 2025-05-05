@@ -3,9 +3,7 @@ import time
 import websockets
 from base64 import b64decode
 
-from ..types.cosmic import console, Cosmic
-from ..types.task import Task
-from ..types.status import Status
+from ..mtypes import Cosmic, console, Task, Status
 
 
 status_mic = Status("正在接收音频", spinner="point")

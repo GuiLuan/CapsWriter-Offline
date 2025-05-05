@@ -6,13 +6,12 @@ from websockets.typing import Subprotocol
 from multiprocessing import Process, Manager
 from platform import system
 
+from .mtypes import Cosmic, console
+from .comm import ws_recv, ws_send
+from .recognize import check_model, recognizer_service
+from .utils import empty_current_working_set
 from .config import ServerConfig as Config
-from .types.cosmic import Cosmic, console
-from .recognize.check_model import check_model
-from .comm.ws_recv import ws_recv
-from .comm.ws_send import ws_send
-from .recognize.recognizer import recognizer_service
-from .utils.empty_working_set import empty_current_working_set
+
 
 BASE_DIR = os.path.dirname(__file__)
 os.chdir(BASE_DIR)  # 确保 os.getcwd() 位置正确，用相对路径加载模型

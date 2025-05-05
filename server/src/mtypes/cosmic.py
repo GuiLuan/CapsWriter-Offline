@@ -1,8 +1,10 @@
+import websockets
 from multiprocessing import Queue
 from typing import Dict
 from multiprocessing.managers import ListProxy
-import websockets
 from rich.console import Console
+
+__all__ = ["Cosmic", "console"]
 
 console = Console(highlight=False)
 
