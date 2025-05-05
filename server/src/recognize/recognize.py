@@ -1,11 +1,9 @@
 import re
 import time
 import numpy as np
+from sherpa_onnx import OfflineRecognizer
 
 from ..types.task import Task, Result
-from ..utils.chinese_itn import chinese_to_num
-from ..utils.format_tools import adjust_space
-from ..config import ServerConfig as Config
 
 __all__ = ["recognize"]
 
@@ -13,8 +11,18 @@ __all__ = ["recognize"]
 RESULTS = {}
 
 
-def recognize(recognizer, punc_model, task: Task) -> Result:
+def recognize(recognizer, task: Task) -> Result:
     """主识别函数，协调各子函数完成语音识别流程"""
+    match recognizer:
+        case OfflineRecognizer():
+            return sherpa_recognize(recognizer, task)
+        case _:
+            raise ValueError(
+                f"不支持的recognizer类型: {type(recognizer).__name__}, 当前只支持OfflineRecognizer"
+            )
+
+
+def sherpa_recognize(recognizer: OfflineRecognizer, task: Task) -> Result:
     # 确保结果容器存在
     result = _ensure_result_container(task)
 
@@ -43,23 +51,10 @@ def recognize(recognizer, punc_model, task: Task) -> Result:
         return result
 
     # 最终处理
-    result.text = format_text(result.text, punc_model)
     result.time_complete = time.time()
     result.is_final = True
     result = RESULTS.pop(task.task_id)
     return result
-
-
-def format_text(text, punc_model):
-    if Config.format_spell:
-        text = adjust_space(text)  # 调空格
-    if Config.format_punc and punc_model and text:
-        text = punc_model(text)[0]  # 加标点
-    if Config.format_num:
-        text = chinese_to_num(text)  # 转数字
-    if Config.format_spell:
-        text = adjust_space(text)  # 调空格
-    return text
 
 
 def _ensure_result_container(task: Task) -> Result:

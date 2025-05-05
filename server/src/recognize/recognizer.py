@@ -6,6 +6,7 @@ from platform import system
 from .recognize import recognize
 from .load_model import load_model
 from ..types.cosmic import console
+from ..utils.format_tools import format_text
 from ..utils.empty_working_set import empty_current_working_set
 from ..config import ServerConfig as Config
 
@@ -58,5 +59,6 @@ def recognizer_service(queue_in: Queue, queue_out: Queue, sockets_id):
         if task.socket_id not in sockets_id:  # 检查任务所属的连接是否存活
             continue
 
-        result = recognize(recognizer, punc_model, task)  # 执行识别
-        queue_out.put(result)  # 返回结果
+        result = recognize(recognizer, task)
+        result.text = format_text(result.text, punc_model)
+        queue_out.put(result)
