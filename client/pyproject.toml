@@ -1,0 +1,18 @@
+[project]
+name = "CapsWriter-Offline-Client"
+version = "0.1.0"
+description = "CapsWriter-Offline的客户端"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "keyboard>=0.13.5",
+    "numpy>=2.2.5",
+    "pyclip>=0.7.0",
+    "pypinyin>=0.54.0",
+    "rich>=14.0.0",
+    "sounddevice>=0.5.1",
+    "srt>=3.5.3",
+    "typer>=0.15.3",
+    "watchdog>=6.0.0",
+    "websockets==13.0",
+]
