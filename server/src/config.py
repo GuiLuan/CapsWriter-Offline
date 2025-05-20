@@ -1,5 +1,11 @@
 from pathlib import Path
-from .mtypes import ParaformerModelArgs, SenseVoiceArgs, CTTransformerArgs
+from typing import Union
+
+from .mtypes import (
+    ParaformerModelArgs,
+    SenseVoiceArgs,
+    CTTransformerArgs,
+)
 
 __all__ = ["ServerConfig"]
 
@@ -45,17 +51,10 @@ cttransformer_model = CTTransformerArgs(
 
 
 class ServerConfig:
-    addr = "0.0.0.0"
-    port = 6016
-
-    # 中文数字 -> 阿拉伯数字
-    format_num = False
-    # 启用 punc_model 与否
-    format_punc = False
-    # 调整中英空格
-    format_spell = True
+    addr: str = "0.0.0.0"
+    port: int = 6016
 
     # 语音识别模型
-    recognize_model = sensevoice_model
-    # 标点断句模型
-    punc_model = cttransformer_model
+    recognize_model_args: Union[ParaformerModelArgs, SenseVoiceArgs] = sensevoice_model
+    # 标点断句模型，值为`None`时表示关闭标点断句功能
+    punc_model_args: Union[CTTransformerArgs, None] = None

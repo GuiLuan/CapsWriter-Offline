@@ -14,10 +14,10 @@ from watchdog.observers import Observer
 
 __all__ = ["update_hot_all", "observe_hot"]
 
-path_zh = Path() / "hot-zh.txt"
-path_en = Path() / "hot-en.txt"
-path_rule = Path() / "hot-rule.txt"
-path_kwds = Path() / "keywords.txt"
+path_zh = Path().resolve() / "assets" / "hot-zh.txt"
+path_en = Path().resolve() / "assets" / "hot-en.txt"
+path_rule = Path().resolve() / "assets" / "hot-rule.txt"
+path_kwds = Path().resolve() / "assets" / "keywords.txt"
 
 
 def update_hot_zh():
@@ -103,6 +103,7 @@ class HotHandler(FileSystemEventHandler):
 
     def on_modified(self, event):
         # 事件间隔小于2秒就取消
+        console.log(event.src_path)
         if time.time() - self.last_time < 2:
             return
 

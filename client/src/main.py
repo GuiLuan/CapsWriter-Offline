@@ -20,6 +20,7 @@ from .utils import (
     show_mic_tips,
     show_file_tips,
     update_hot_all,
+    observe_hot,
     empty_current_working_set,
 )
 from .comm import ws_recv
@@ -53,7 +54,7 @@ async def main_mic():
     update_hot_all()
 
     # 实时更新热词
-    # observer = observe_hot()
+    obs = observe_hot()
 
     # 打开音频流
     Cosmic.stream = stream_open()

@@ -2,10 +2,13 @@ import time
 import signal
 from multiprocessing import Queue
 from platform import system
+from typing import Union
+
+from funasr_onnx import CT_Transformer
 
 from . import recognize, load_model
 from ..mtypes import console
-from ..utils import format_text, empty_current_working_set
+from ..utils import empty_current_working_set
 from ..config import ServerConfig as Config
 
 
@@ -26,16 +29,16 @@ def recognizer_service(queue_in: Queue, queue_out: Queue, sockets_id):
     # 载入语音模型
     t1 = time.time()
     console.print("[yellow]语音模型载入中", end="\r")
-    recognizer = load_model(Config.recognize_model)
+    recognizer = load_model(Config.recognize_model_args)
     console.print("[green4]语音模型载入完成", end="\n\n")
     console.print(f"[green4]语音模型载入耗时：{time.time() - t1}", end="\n\n")
 
     # 载入标点模型
     t2 = time.time()
-    punc_model = None
-    if Config.format_punc:
+    punc_model: Union[None, CT_Transformer] = None
+    if Config.punc_model_args is not None:
         console.print("[yellow]标点模型载入中", end="\r")
-        punc_model = load_model(Config.punc_model)
+        punc_model = load_model(Config.punc_model_args)  # type: ignore
         console.print("[green4]标点模型载入完成", end="\n\n")
         console.print(f"[green4]标点模型载入耗时：{time.time() - t2}", end="\n\n")
     console.print(f"模型加载总耗时 {time.time() - t1:.2f}s", end="\n\n")
@@ -58,5 +61,6 @@ def recognizer_service(queue_in: Queue, queue_out: Queue, sockets_id):
             continue
 
         result = recognize(recognizer, task)
-        result.text = format_text(result.text, punc_model)
+        if punc_model is not None:
+            result.text = punc_model(result.text)[0]
         queue_out.put(result)
