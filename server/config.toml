@@ -1,0 +1,33 @@
+[server]
+addr = "0.0.0.0"
+port = 6016
+
+[recognize_model]
+_type = "paraformer"
+paraformer = "./models/paraformer-offline-zh/model.int8.onnx"
+tokens = "./models/paraformer-offline-zh/tokens.txt"
+num_threads = 6
+sample_rate = 16000
+feature_dim = 80
+decoding_method = "greedy_search"
+debug = false
+
+# [recognize_model]
+# _type = "sensevoice"
+# model = "./models/sherpa-onnx-sense-voice-zh-en-ja-ko-yue-2024-07-17/model.int8.onnx"
+# tokens = "./models/sherpa-onnx-sense-voice-zh-en-ja-ko-yue-2024-07-17/tokens.txt"
+# num_threads = 6
+# sample_rate = 16000
+# feature_dim = 80
+# decoding_method = "greedy_search"
+# use_itn = false
+# debug = false
+
+[punc_model]
+_enable = false
+_type = "cttransformer"
+model_dir = "./models/punc_ct-transformer_cn-en"
+batch_size = 1
+device_id = "-1"
+quantize = true
+intra_op_num_threads = 6

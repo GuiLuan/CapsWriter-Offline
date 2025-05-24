@@ -1,0 +1,15 @@
+[server]
+addr = "127.0.0.1" # Server 地址
+port = 6016        # Server 端口
+
+[shortcut]
+key = "caps lock"
+hold_mode = true
+suppress = false
+restore_key = true
+
+# 中文键需要用引号包裹
+[hot_words.zh]
+enabled = true
+"多音字" = true
+"声调" = false

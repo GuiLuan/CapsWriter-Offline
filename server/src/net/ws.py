@@ -1,15 +1,90 @@
-import json
 import time
-import websockets
+import json
+import asyncio
 from base64 import b64decode
 
-from ..mtypes import Cosmic, console, Task, Status
+import websockets
+
+from ..utils import load_config, Cosmic, console, Status, Task, Result
+
+__all__ = ["ws_send_service", "ws_recv_service"]
+
+
+async def ws_send_service():
+    queue_out = Cosmic.queue_out
+    sockets = Cosmic.sockets
+
+    while True:
+        try:
+            # 获取识别结果（从多进程队列）
+            result: Result = await asyncio.to_thread(queue_out.get)
+
+            # 得到退出的通知
+            if result is None:
+                print("收到None，退出循环")  # 调试信息
+                return
+
+            # 构建消息
+            message = {
+                "task_id": result.task_id,
+                "duration": result.duration,
+                "time_start": result.time_start,
+                "time_submit": result.time_submit,
+                "time_complete": result.time_complete,
+                "tokens": result.tokens,
+                "timestamps": result.timestamps,
+                "text": result.text,
+                "is_final": result.is_final,
+            }
+
+            # 获得 socket
+            websocket = next(
+                (ws for ws in sockets.values() if str(ws.id) == result.socket_id),
+                None,
+            )
+
+            if not websocket:
+                continue
+
+            # 发送消息
+            await websocket.send(json.dumps(message))
+
+            if result.source == "mic":
+                console.print(f"识别结果：\n    [green]{result.text}")
+            elif result.source == "file":
+                console.print(f"    转录进度：{result.duration:.2f}s", end="\r")
+                if result.is_final:
+                    console.print("\n    [green]转录完成")
+
+        except asyncio.CancelledError:
+            return
+
+        except Exception as e:
+            print(e)
+
+
+async def ws_recv_service():
+    cfg = load_config()["server"]
+    server = await websockets.serve(
+        _ws_recv,
+        cfg["addr"],
+        cfg["port"],
+        subprotocols=[websockets.Subprotocol("binary")],
+        max_size=None,
+    )
+    try:
+        await server.wait_closed()
+    except asyncio.CancelledError:
+        pass
+    finally:
+        server.close()
+        await asyncio.shield(server.wait_closed())
 
 
 status_mic = Status("正在接收音频", spinner="point")
 
 
-async def ws_recv(websocket):
+async def _ws_recv(websocket):
     global status_mic
 
     # 登记 socket 到字典，以 socket id 字符串为索引

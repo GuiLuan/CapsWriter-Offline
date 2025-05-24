@@ -1,27 +1,20 @@
 import os
 import sys
 import asyncio
-import websockets
-from websockets.typing import Subprotocol
 from multiprocessing import Process, Manager
 from platform import system
 
-from .mtypes import Cosmic, console
-from .comm import ws_recv, ws_send
-from .recognize import check_model, recognizer_service
-from .utils import empty_current_working_set
-from .config import ServerConfig as Config
+from .asr import recognize_service
+from .net import ws_recv_service, ws_send_service
+from .utils import console, Cosmic, load_config, empty_current_working_set
+
+__all__ = ["start"]
 
 
-BASE_DIR = os.path.dirname(__file__)
-os.chdir(BASE_DIR)  # 确保 os.getcwd() 位置正确，用相对路径加载模型
-
-__all__ = ["start_server"]
-
-
-def start_server():
+def start():
+    """主进程"""
     try:
-        asyncio.run(run_all_service())
+        asyncio.run(start_all_service())
     except KeyboardInterrupt:
         # Ctrl+C退出
         console.print("\n再见！")
@@ -30,32 +23,19 @@ def start_server():
         console.print(f"出错了：{e}", style="bright_red")
         console.input("...")
     except Exception as e:
-        print(e)
+        console.print(e, style="bright_red")
     finally:
         stop_all_service()
         sys.exit(0)
 
 
-async def run_all_service():
-    """主服务入口"""
-    # 检查模型文件
-    check_model()
-    # 打印服务器基本信息
+async def start_all_service():
     print_server_info()
-
-    # 初始化共享资源
     await initialize_shared_resources()
-
-    # 启动识别子进程
     await start_recognizer_service()
-
     console.rule("[green3]开始服务")
     console.line()
-
-    # 系统优化
-    await optimize_system()
-
-    # 启动WebSocket服务
+    optimize_system()
     await start_websocket_service()
 
 
@@ -65,40 +45,30 @@ def stop_all_service():
 
 def print_server_info():
     """打印服务器基本信息"""
+    server_config = load_config()["server"]
+    addr, port = server_config["addr"], server_config["port"]
     console.line(2)
     console.rule("[bold #d55252]CapsWriter Offline Server")
     console.line()
     console.print(
-        "项目地址：[cyan underline]https://github.com/HaujetZhao/CapsWriter-Offline",
+        "项目地址：[cyan underline]https://github.com/GuiLuan/CapsWriter-Offline",
         end="\n\n",
     )
-    console.print(f"当前基文件夹：[cyan underline]{BASE_DIR}", end="\n\n")
-    console.print(
-        f"绑定的服务地址：[cyan underline]{Config.addr}:{Config.port}", end="\n\n"
-    )
+    console.print(f"当前基文件夹：[cyan underline]{os.getcwd()}", end="\n\n")
+    console.print(f"绑定的服务地址：[cyan underline]{addr}:{port}", end="\n\n")
 
 
 async def start_websocket_service():
     """启动WebSocket服务"""
-    # 负责接收客户端数据的 coroutine
-    recv = websockets.serve(
-        ws_recv,
-        Config.addr,
-        Config.port,
-        subprotocols=[Subprotocol("binary")],
-        max_size=None,
-    )
-
-    # 负责发送结果的 coroutine
-    send = ws_send()
-    # 加入都执行列表
+    recv = ws_recv_service()
+    send = ws_send_service()
     await asyncio.gather(recv, send)
 
 
 async def start_recognizer_service():
     """启动并等待识别子进程初始化完成"""
     recognize_process = Process(
-        target=recognizer_service,
+        target=recognize_service,
         args=(Cosmic.queue_in, Cosmic.queue_out, Cosmic.sockets_id),
         daemon=True,
     )
@@ -112,11 +82,11 @@ async def initialize_shared_resources():
     Cosmic.sockets_id = Manager().list()
 
 
-async def optimize_system():
+def optimize_system():
     """执行系统优化操作"""
     if system() == "Windows":
         empty_current_working_set()
 
 
 if __name__ == "__main__":
-    start_server()
+    start()
